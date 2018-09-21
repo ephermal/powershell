@@ -1,0 +1,51 @@
+#Script to find expired accounts and accounts expiring soon
+#Jerry Reid
+#This script runs and sends an email; it requires a local email server.
+
+
+Import-Module ActiveDirectory
+
+$date = Get-Date
+#$date = $date.AddDays(6)
+$begdate = Get-Date -date $date -Format "MMM d"
+$dateadd = $date.adddays(31) -as [datetime]
+$enddate = Get-Date -date $dateadd -Format "MMM d" 
+
+$expireds = Search-ADAccount -AccountExpired | where {$_.Enabled -eq $true} | Select Name, AccountExpirationdate,DistinguishedName,Enabled,@{Name='Manager';Expression={(Get-ADUser(Get-ADUser $_ -properties Manager).manager).Name}} | fl Name, AccountExpirationdate, Enabled, Manager
+    if ($expireds -eq $null){
+        $body = "Good morning, `n`nThere are no currently expired accounts."
+        }
+    else {
+        $body ="Good morning, `n`nThe following accounts have been detected as expired yet still active"
+        $out = $expireds | Out-String
+        $body += $out
+        }
+
+$body += "`n`nAdditionally...`n`n"
+
+$expiring = Search-ADAccount -AccountExpiring -TimeSpan "120" | where {$_.Enabled -eq $true}| Select Name, AccountExpirationdate,DistinguishedName,Enabled,@{Name='Manager';Expression={(Get-ADUser(Get-ADUser $_ -properties Manager).manager).Name}} | fl Name, AccountExpirationdate, Enabled, Manager
+    if ($expiring -eq $null){
+        $body += "No accounts are expiring within the next 120 days."
+        }
+    Else {
+        $body += "The following accounts were detected as expiring soon:"
+        $out = $expiring | Out-String
+        $body += $out
+        }
+
+$SMTPServer = "$smtpserver"
+$SMTPPort = "smtpport"
+
+
+$subject = "Weekly Account Report for $begdate `- $enddate"
+
+$message = New-Object System.Net.Mail.MailMessage
+$message.subject = $subject
+$message.body = $body
+$message.to.add("gerald.reid@mulesoft.com")
+$message.from = "domain@obt.mulesoft.com"
+#$message.attachments.add($attachment)
+
+$smtp = New-Object System.Net.Mail.SmtpClient($SMTPServer, $SMTPPort);
+$smtp.EnableSSL = $False
+$smtp.send($message)
