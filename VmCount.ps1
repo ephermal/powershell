@@ -1,3 +1,5 @@
+#Count the Number of VMS using a list of hosts
+
 
 $VMhosts = Get-Content c:\Users\Administrator\Desktop\esxilist.txt
 $Vmcount = @()
