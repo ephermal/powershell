@@ -34,7 +34,7 @@ echo "Updated at" $a | Out-File $env:USERPROFILE\Desktop\index.html -append
 #$VMhosts = .\esxilist.txt
 $Vmcount = @()
 
-$Cred1 = New-Object System.Management.Automation.PSCredential ("root",(ConvertTo-SecureString -string "9e8pe=f@7xvmkkre" -asplaintext -force))
+$Cred1 = New-Object System.Management.Automation.PSCredential ("root",(ConvertTo-SecureString -string "$SECUREPASSWORD" -asplaintext -force))
 
 
 Get-Content .\Desktop\esxilist.txt | ForEach-Object{
@@ -42,9 +42,3 @@ Get-Content .\Desktop\esxilist.txt | ForEach-Object{
     Connect-ViServer $_ -Credential $Cred1
     Get-VM | Select-Object -property VMHost,Name,PowerState,@{N="OS Full";E={$_.ExtensionData.Guest.guestFullName}},NumCpu,MemoryGB,@{N="IP Address";E={@($_.guest.IPAddress[0])}} | ConvertTo-HTML -Head $Header  | Out-File $env:USERPROFILE\Desktop\index.html -append
    }
-
-
-
-
-#CP transfer to NFS; Webserver has a symlink
-Copy-Item "C:\Users\Administrator\Desktop\index.html" -Destination "\\10.230.39.84\backup\jerry\vms"
