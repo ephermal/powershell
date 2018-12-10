@@ -25,3 +25,6 @@ $setcores = new-object -typename VMware.VIM.virtualmachineconfigspec -property @
 #Start the VM again
 Start-VM $vmname
 
+
+#test Git
+
