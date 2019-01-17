@@ -18,20 +18,22 @@ Connect-VIServer $VMHOST -Username $HostUser -Password $HostPass
 
 #Prompt User for How Many VMs they want to create 
 $NumGuest = Read-Host "How many guest would you like to make "
-#Create the VM with Nessus Specs
 
+#Create the VM with Nessus Specs
+function createVM{
 for ($i=1; $i-le$NumGuest; $i++)
-{
+    {
  $Guest_hostname = Read-Host "what would you like the hostname to be [Theater]-[City]-[Role]-[#] ?"
- New-VM -Name $Guest_hostname -MemoryMB 8000 -NumCPU 4 -DiskMB 100000 -Version v8 -GuestId Server2012R2 -DiskStorageFormat thin
+ New-VM -Name $Guest_hostname -MemoryMB 8000 -NumCPU 4 -DiskMB 100000 -Version v8 -DiskStorageFormat thin
  Get-VM $Guest_hostname| Get-ScsiController | Set-ScsiController -Type VirtualLsiLogicSAS 
  Get-VM $Guest_hostname | Get-NetworkAdapter | Set-NetworkAdapter -Type E1000 | Set-VMQuestion -DefaultOption
 #You need to start and stop the VM to generate the mac address
  Start-VM $Guest_hostname
  Start-Sleep -s 5
  Stop-VM $Guest_hostname | Set-VMQuestion -DefaultOption
-}
-           }
+     }
+                  }
+          
 
 
 #Deploy the Nessus Image 
@@ -39,7 +41,12 @@ function DelpoyNessus{}
 
 
 
-function DeployWindows{}
+function DeployWindows{
+     $ovfPath =" <path to ovf file >" #probably s3 somewhere
+     $ovfConfig = Get-OvfConfiguration -Ovf $ovfPath # Prompt to set up values 
+     
+
+}
 
 
 
@@ -50,6 +57,7 @@ function DeployLinux{}
 
 function ChooseYourOption{
      #Case Switch Statement or Menu
+     createVM
 }
 
 
