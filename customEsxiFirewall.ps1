@@ -17,7 +17,7 @@ $esxcli = Get-EsxCli -VMHost $esxihost -V2
 
 
 $arguments = @{
-    #this ruleset ID needs to be the same as it is int he xml file
+    #this ruleset ID needs to be the same as it is in the xml file
     rulesetid = ''
     }
 
